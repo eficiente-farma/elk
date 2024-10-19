@@ -1,0 +1,38 @@
+services:
+
+  elasticsearch:
+    build:
+      context: ./elasticsearch/
+    volumes:
+      - ./dockerimages/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+
+  logstash:
+    build:
+      context: ./logstash/
+    volumes:
+      - ./dockerimages/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./dockerimages/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: ./kibana/
+    volumes:
+      - ./dockerimages/kibana/config/:/usr/share/kibana/config:ro
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  elk:
+    driver: bridge
